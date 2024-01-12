@@ -13,7 +13,7 @@ function calc_size () {
   local requestedsize="${1:?}"
   local mountpoint="${2:?}"
   local availablesize
-  availablesize="$(available_space $mountpoint)"
+  availablesize="$(available_space "$mountpoint")"
   if [ "$availablesize" -lt 0 ]
   then
     echo "0"
@@ -222,7 +222,7 @@ function main () {
   add_drive "cam" "CAM" "$CAM_DISK_SIZE" "$CAM_DISK_FILE_NAME" "$USE_EXFAT"
   log_progress "INFO: created camera backing file"
 
-  REMAINING_SPACE="$(available_space $BACKINGFILES_MOUNTPOINT)"
+  REMAINING_SPACE="$(available_space "$BACKINGFILES_MOUNTPOINT")"
 
   if [ "$CAM_SIZE" = "100%" ]
   then
@@ -238,7 +238,7 @@ function main () {
     log_progress "created music backing file: $MUSIC_DISK_FILE_NAME"
   fi
 
-  REMAINING_SPACE="$(available_space $BACKINGFILES_MOUNTPOINT)"
+  REMAINING_SPACE="$(available_space "$BACKINGFILES_MOUNTPOINT")"
   if [ "$BOOMBOX_DISK_SIZE" -gt "$REMAINING_SPACE" ]
   then
     BOOMBOX_DISK_SIZE="$REMAINING_SPACE"
