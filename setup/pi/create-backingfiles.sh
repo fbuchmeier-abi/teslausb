@@ -40,7 +40,14 @@ function is_percent() {
 function dehumanize () {
   # Note that this uses powers-of-two rather than the powers-of-ten that are
   # generally used to market storage.
-  echo $(($(echo "$1" | sed 's/GB/G/;s/MB/M/;s/KB/K/;s/G/*1024M/;s/M/*1024K/;s/K/*1024/')))
+  local value="${1:?}"
+  if echo "$value" | grep -E '[0-9]+[GMK]B?' > /dev/null
+  then
+    echo $(($(echo "$value" | sed 's/GB/G/;s/MB/M/;s/KB/K/;s/G/*1024M/;s/M/*1024K/;s/K/*1024/')))
+  else
+    echo "ERROR: value $value not supported"
+    exit 1
+  fi
 }
 
 function first_partition_offset () {

@@ -25,13 +25,11 @@ setup() {
 }
 
 @test "get available space (-10GB) in 1kB blocks" {
-    export -f df
     run available_space "100GB"
     assert_output '94371840'
 }
 
 @test "get not enough available space (-10GB) in 1kB blocks" {
-    export -f df
     run available_space "10GB"
     assert_output '0'
 }
