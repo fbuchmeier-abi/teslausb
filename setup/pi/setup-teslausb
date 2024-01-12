@@ -303,7 +303,7 @@ function create_usb_drive_backing_files () {
     setup_progress "Mounted the mutable partition."
   fi
 
-  if [ ! -e $BACKINGFILES_MOUNTPOINT/cam_disk.bin ]
+  if [ ! -e $BACKINGFILES_MOUNTPOINT/cam_disk.bin ] || [ ! -e $BACKINGFILES_MOUNTPOINT/music_disk.bin ] || [ ! -e $BACKINGFILES_MOUNTPOINT/boombox_disk.bin ]
   then
     setup_progress "Creating backing disk files."
     copy_script setup/pi/create-backingfiles.sh /tmp
