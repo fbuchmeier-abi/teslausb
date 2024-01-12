@@ -85,7 +85,7 @@ function add_drive () {
   
   if [ -e "$filename" ]
   then
-    log_progress "Backing file "$filename" already exists, nothing to do"
+    log_progress "Backing file "$filename" already exists, nothing to do. To resize it, remove it and rerun setup-teslausb"
     return
   fi
   log_progress "Allocating ${size}K for $filename..."
@@ -142,29 +142,33 @@ BOOMBOX_DISK_FILE_NAME="$BACKINGFILES_MOUNTPOINT/boombox_disk.bin"
 # because they interfere with the percentage-of-free-space calculation
 if [ -e "$CAM_DISK_FILE_NAME" ] || [ -e "$MUSIC_DISK_FILE_NAME" ] || [ -e "$BOOMBOX_DISK_FILE_NAME" ] || [ -e "$BACKINGFILES_MOUNTPOINT/snapshots" ]
 then
+  # when executed interactively, ask the user what to do
   if [ -t 0 ]
   then
     read -r -p 'Delete snapshots and recreate recording and music drives? (yes/cancel)' answer
     case ${answer:0:1} in
       y|Y )
+        log_progress "stopping all services"
+        killall archiveloop || true
+        /root/bin/disable_gadget.sh || true
+        umount -d /mnt/cam || true
+        umount -d /mnt/music || true
+        umount -d /mnt/boombox || true
+        umount -d /backingfiles/snapshots/snap*/mnt || true
+        log_progress "deleting backing files at $BACKINGFILES_MOUNTPOINT"
+        rm -f "$CAM_DISK_FILE_NAME"
+        rm -f "$MUSIC_DISK_FILE_NAME"
+        rm -f "$BOOMBOX_DISK_FILE_NAME"
+        rm -rf "$BACKINGFILES_MOUNTPOINT/snapshots"
       ;;
       * )
         log_progress "aborting"
         exit
       ;;
     esac
-  fi
+  else
+    log_progress "WARNING: $BACKINGFILES_MOUNTPOINT already contains backing files. In case you want to resize them, delete the affected files and rerun setup-teslausb"
 fi
-killall archiveloop || true
-/root/bin/disable_gadget.sh || true
-umount -d /mnt/cam || true
-umount -d /mnt/music || true
-umount -d /mnt/boombox || true
-umount -d /backingfiles/snapshots/snap*/mnt || true
-rm -f "$CAM_DISK_FILE_NAME"
-rm -f "$MUSIC_DISK_FILE_NAME"
-rm -f "$BOOMBOX_DISK_FILE_NAME"
-rm -rf "$BACKINGFILES_MOUNTPOINT/snapshots"
 
 # Check if kernel supports ExFAT 
 if ! check_for_exfat_support
