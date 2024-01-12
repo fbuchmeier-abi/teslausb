@@ -63,7 +63,11 @@ function do_music_sync {
   if ! rsync -rum --no-human-readable \
                 --exclude-from=<([ "${#MUSIC_EXCLUDES[@]}" -gt 0 ] && printf -- '- %s\n' "${MUSIC_EXCLUDES[@]}") \
                 --include-from=<([ "${#MUSIC_INCLUDES[@]}" -gt 0 ] && printf -- '+ %s\n' "${MUSIC_INCLUDES[@]}") \
-                --delete --modify-window=2 --info=stats2 "$SRC/" "$DST" &> "$LOG"
+                --delete-excluded \
+                --delete \
+                --modify-window=2 \
+                --info=stats2 \
+                "$SRC/" "$DST" &> "$LOG"
   then
     log "rsync failed with error $?"
   fi

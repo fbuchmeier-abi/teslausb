@@ -103,6 +103,7 @@ export CAM_SIZE=30G
 # export MUSIC_SHARE_NAME=your_music_share/music_folder
 
 # To exclude specific files and folders from the music sync, add them to the array
+# Excludes will be deleted from the music music store when the already exist
 # See rsync `--exclude` and `--filter` for more details
 # https://linux.die.net/man/1/rsync
 export MUSIC_EXCLUDES=()
