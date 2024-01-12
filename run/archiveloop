@@ -9,7 +9,13 @@ fi
 # Unload the module that was loaded by cmdline.txt
 modprobe -r g_ether
 
-export LOG_FILE=/mutable/archiveloop.log
+# Write log to tmpfs to save write cycles on sdcards
+mkdir -p /mutable/logs
+if ! mount | grep 'none on /mutable/logs type tmpfs' > /dev/null
+then
+  mount -t tmpfs none /mutable/logs
+fi
+export LOG_FILE=/mutable/logs/archiveloop.log
 
 function log () {
   echo -n "$( date ): " >> "$LOG_FILE"
@@ -622,7 +628,9 @@ function copy_music_files () {
 
   ensure_music_file_is_mounted
 
-  MUSIC_EXCLUDES=$MUSIC_EXCLUDES MUSIC_INCLUDES=$MUSIC_INCLUDES /root/bin/copy-music.sh
+  # The script must be sourced and thus executed in the context of the current shell
+  # to get access to array variables MUSIC_EXCLUDES and MUSIC_INCLUDES
+  source /root/bin/copy-music.sh
 
   # Trim the empty space from the music archive.
   trim_free_space "$MUSIC_MOUNT"

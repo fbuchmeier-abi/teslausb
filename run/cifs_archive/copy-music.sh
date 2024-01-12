@@ -34,7 +34,8 @@ function connectionmonitor {
 }
 
 function do_music_sync {
-  log "Syncing music from archive..."
+  local archive=$(mount | grep /mnt/musicarchive | cut -d' ' -f1-5)
+  log "Syncing music from archive: $archive"
 
   # return immediately if the archive mount can't be accessed
   if ! timeout 5 stat "$SRC" > /dev/null
@@ -60,9 +61,19 @@ function do_music_sync {
     '"System Volume Information/***'
   )
 
-  if ! rsync -rum --no-human-readable \
-                --exclude-from=<([ "${#MUSIC_EXCLUDES[@]}" -gt 0 ] && printf -- '- %s\n' "${MUSIC_EXCLUDES[@]}") \
+  log "Running command:"
+  log "rsync -rum --no-human-readable \
                 --include-from=<([ "${#MUSIC_INCLUDES[@]}" -gt 0 ] && printf -- '+ %s\n' "${MUSIC_INCLUDES[@]}") \
+                --exclude-from=<([ "${#MUSIC_EXCLUDES[@]}" -gt 0 ] && printf -- '- %s\n' "${MUSIC_EXCLUDES[@]}") \
+                --delete-excluded \
+                --delete \
+                --modify-window=2 \
+                --info=stats2 \
+                "$SRC/" "$DST""
+  # NOTE: it is important to include patterns first and then exclude them. This ensures includes take precedence over excludes
+  if ! rsync -rum --no-human-readable \
+                --include-from=<([ "${#MUSIC_INCLUDES[@]}" -gt 0 ] && printf -- '+ %s\n' "${MUSIC_INCLUDES[@]}") \
+                --exclude-from=<([ "${#MUSIC_EXCLUDES[@]}" -gt 0 ] && printf -- '- %s\n' "${MUSIC_EXCLUDES[@]}") \
                 --delete-excluded \
                 --delete \
                 --modify-window=2 \
