@@ -102,6 +102,15 @@ export CAM_SIZE=30G
 # the folder needs to be different.
 # export MUSIC_SHARE_NAME=your_music_share/music_folder
 
+# To exclude specific files and folders from the music sync, add them to the array
+# See rsync `--exclude` and `--filter` for more details
+# https://linux.die.net/man/1/rsync
+export MUSIC_EXCLUDES=()
+# export MUSIC_EXCLUDES+=('afolder/thatshouldnot/besynced')
+# export MUSIC_EXCLUDES+=('anotherfolder/that contains special chars')
+# To include specific files and folders, add them to the array
+export MUSIC_INCLUDES=()
+
 # Wifi setup information. Note that Raspberry Pi Zero W only supports 2.4 GHz
 # wifi.
 # If you are you are trying to connect to a network with a _hidden_ SSID,

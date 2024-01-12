@@ -622,7 +622,7 @@ function copy_music_files () {
 
   ensure_music_file_is_mounted
 
-  /root/bin/copy-music.sh
+  MUSIC_EXCLUDES=$MUSIC_EXCLUDES MUSIC_INCLUDES=$MUSIC_INCLUDES /root/bin/copy-music.sh
 
   # Trim the empty space from the music archive.
   trim_free_space "$MUSIC_MOUNT"
