@@ -84,6 +84,11 @@ function add_drive () {
   local useexfat="$5"
 
   log_progress "Allocating ${size}K for $filename..."
+  if [ -e "$filename" ]
+  then
+    log_progress "Backing file "$filename" already exists, nothing to do"
+    return
+  fi
   fallocate -l "$size"K "$filename"
   if [ "$useexfat" = true  ]
   then
