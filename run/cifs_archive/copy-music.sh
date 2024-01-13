@@ -58,7 +58,7 @@ function do_music_sync {
     '.fseventsd/***'
     '*.DS_Store'
     '.metadata_never_index'
-    '"System Volume Information/***'
+    'System Volume Information/***'
   )
 
   log "Running command:"
