@@ -9,13 +9,7 @@ fi
 # Unload the module that was loaded by cmdline.txt
 modprobe -r g_ether
 
-# Write log to tmpfs to save write cycles on sdcards
-mkdir -p /mutable/logs
-if ! mount | grep 'none on /mutable/logs type tmpfs' > /dev/null
-then
-  mount -t tmpfs none /mutable/logs
-fi
-export LOG_FILE=/mutable/logs/archiveloop.log
+export LOG_FILE=/mutable/archiveloop.log
 
 function log () {
   echo -n "$( date ): " >> "$LOG_FILE"
