@@ -34,7 +34,8 @@ function connectionmonitor {
 }
 
 function do_music_sync {
-  log "Syncing music from archive..."
+  local archive=$(mount | grep /mnt/musicarchive | cut -d' ' -f1-5)
+  log "Syncing music from archive: $archive"
 
   # return immediately if the archive mount can't be accessed
   if ! timeout 5 stat "$SRC" > /dev/null
@@ -53,12 +54,60 @@ function do_music_sync {
 
   connectionmonitor $$ &
 
-  if ! rsync -rum --no-human-readable --exclude=.fseventsd/*** --exclude=*.DS_Store --exclude=.metadata_never_index \
-                --exclude="System Volume Information/***" \
-                --delete --modify-window=2 --info=stats2 "$SRC/" "$DST" &> "$LOG"
+  MUSIC_EXCLUDES+=(
+    '.fseventsd/***'
+    '*.DS_Store'
+    '.metadata_never_index'
+    'System Volume Information/***'
+  )
+
+  local includes_file=$(mktemp)
+  if [ "${#MUSIC_INCLUDES[@]}" -gt 0 ]
+  then
+    log "Found ${#MUSIC_INCLUDES[@]} music includes to process, suffix set to <$MUSIC_INCLUDES_SUFFIX>"
+    for include in "${MUSIC_INCLUDES[@]}"
+    do
+      printf -- '+ %s%s\n' "$include" "$MUSIC_INCLUDES_SUFFIX" >> "$includes_file"
+    done
+  else
+    log "No music includes defined"
+  fi
+
+  local excludes_file=$(mktemp)
+  if [ "${#MUSIC_EXCLUDES[@]}" -gt 0 ]
+  then
+    log "Found ${#MUSIC_EXCLUDES[@]} music excludes to process."
+    for exclude in "${MUSIC_EXCLUDES[@]}"
+    do
+      printf -- '- %s\n' "$exclude" >> "$excludes_file"
+    done
+  else
+    log "No music excludes defined"
+  fi
+
+  log "Running command:"
+  log "rsync -rum --no-human-readable \
+                --include-from=$includes_file \
+                --exclude-from=$excludes_file \
+                --delete-excluded \
+                --delete \
+                --modify-window=2 \
+                --info=stats2 \
+                "$SRC/" "$DST""
+  # NOTE: it is important to include patterns first and then exclude them. This ensures includes take precedence over excludes
+  if ! rsync -rum --no-human-readable \
+                --include-from="$includes_file" \
+                --exclude-from="$excludes_file" \
+                --delete-excluded \
+                --delete \
+                --modify-window=2 \
+                --info=stats2 \
+                "$SRC/" "$DST" &> "$LOG"
   then
     log "rsync failed with error $?"
   fi
+
+  rm "$includes_file" "$excludes_file"
 
   # Stop the connection monitor.
   kill %1 || true

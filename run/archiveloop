@@ -622,7 +622,9 @@ function copy_music_files () {
 
   ensure_music_file_is_mounted
 
-  /root/bin/copy-music.sh
+  # The script must be sourced and thus executed in the context of the current shell
+  # to get access to array variables MUSIC_EXCLUDES and MUSIC_INCLUDES
+  source /root/bin/copy-music.sh
 
   # Trim the empty space from the music archive.
   trim_free_space "$MUSIC_MOUNT"
